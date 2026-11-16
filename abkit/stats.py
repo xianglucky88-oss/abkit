@@ -9,6 +9,53 @@ def normal_cdf(x: float) -> float:
     return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
+def chi2_sf(x: float, df: int) -> float:
+    """卡方分布的右尾概率 P(X > x)，即拟合优度检验的 p 值。
+
+    基于正则化上不完全伽马函数 Q(df/2, x/2)，用级数展开 / 连分数
+    （Numerical Recipes 的 gammp/gammq 思路）纯标准库实现，df >= 1。
+    """
+    if df <= 0:
+        raise ValueError("degrees of freedom must be positive")
+    if x <= 0:
+        return 1.0
+    a = df / 2.0
+    z = x / 2.0
+    if z < a + 1.0:
+        # 级数展开：1 - P(a, z)
+        term = 1.0 / a
+        total = term
+        for k in range(1, 1000):
+            term *= z / (a + k)
+            total += term
+            if abs(term) < abs(total) * 1e-15:
+                break
+        q = 1.0 - total * math.exp(-z + a * math.log(z) - math.lgamma(a))
+    else:
+        # 连分数：Q(a, z)
+        tiny = 1e-300
+        b = z + 1.0 - a
+        c = 1.0 / tiny
+        d = 1.0 / b
+        h = d
+        for i in range(1, 1000):
+            an = -i * (i - a)
+            b += 2.0
+            d = an * d + b
+            if abs(d) < tiny:
+                d = tiny
+            c = b + an / c
+            if abs(c) < tiny:
+                c = tiny
+            d = 1.0 / d
+            delta = d * c
+            h *= delta
+            if abs(delta - 1.0) < 1e-15:
+                break
+        q = h * math.exp(-z + a * math.log(z) - math.lgamma(a))
+    return min(1.0, max(0.0, q))
+
+
 def normal_ppf(p: float) -> float:
     """标准正态分位数。用二分法反解 CDF，精度足够工程使用。"""
     if not 0.0 < p < 1.0:
