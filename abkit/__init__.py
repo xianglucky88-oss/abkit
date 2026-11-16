@@ -12,3 +12,17 @@
 """
 
 __version__ = "0.5.0"
+
+from .multiple import bh, correct, holm
+from .report import markdown, summarize, summarize_metrics, to_json
+
+__all__ = [
+    "bh",
+    "holm",
+    "correct",
+    "summarize",
+    "summarize_metrics",
+    "markdown",
+    "to_json",
+]
+

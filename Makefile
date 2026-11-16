@@ -12,7 +12,7 @@ test:
 	PYTHONPYCACHEPREFIX=/tmp/abkit-pycache $(PY) -m unittest discover -s tests -v
 
 demo:
-	$(PY) scripts/demo.py
+	PYTHONPYCACHEPREFIX=/tmp/abkit-pycache PYTHONPATH=. $(PY) scripts/demo.py
 
 verify:
 	sh scripts/verify.sh
