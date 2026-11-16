@@ -9,6 +9,10 @@ def normal_cdf(x: float) -> float:
     return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
+def normal_pdf(x: float) -> float:
+    return math.exp(-0.5 * x * x) / math.sqrt(2.0 * math.pi)
+
+
 def normal_ppf(p: float) -> float:
     """标准正态分位数。用二分法反解 CDF，精度足够工程使用。"""
     if not 0.0 < p < 1.0:
@@ -55,3 +59,18 @@ def welch_t(a: list[float], b: list[float]) -> tuple[float, float]:
     t = (mean(a) - mean(b)) / se
     p = 2 * (1 - normal_cdf(abs(t)))
     return t, p
+
+
+def wilson_interval(successes: int, trials: int, confidence: float = 0.95) -> tuple[float, float]:
+    """二项比例的 Wilson 置信区间。
+
+    trials <= 0 时返回全区间 (0.0, 1.0)，避免空样本产生 NaN。
+    """
+    if trials <= 0:
+        return 0.0, 1.0
+    z = normal_ppf(1.0 - (1.0 - confidence) / 2.0)
+    p = successes / trials
+    denom = 1.0 + z * z / trials
+    center = (p + z * z / (2.0 * trials)) / denom
+    half = z * math.sqrt(p * (1.0 - p) / trials + z * z / (4.0 * trials * trials)) / denom
+    return max(0.0, center - half), min(1.0, center + half)
