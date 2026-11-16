@@ -7,8 +7,9 @@
     multiple    多重比较校正
     segment     分层与异质性分析
     power       功效与样本量
+    planning    规划流程（方差缩减 → 调整后不确定性 → 样本量/MDE）
     report      结论报告
     simulator   合成实验（已知真值，用于校准）
 """
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
